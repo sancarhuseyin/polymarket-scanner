@@ -2,7 +2,7 @@
 
 **Polymarket Edge Desk** is a professional-grade TypeScript trading terminal, scanner, and execution bot designed to exploit mathematical pricing inefficiencies and high-probability setups on Polymarket's decentralized prediction markets. The bot automates the identification and execution of near-zero YES contract yield harvesting and mutually exclusive negative risk basket arbitrage.
 
-![Polymarket Edge Desk Dashboard Preview](screenshots/ui_preview.jpg)
+![Polymarket Edge Desk Dashboard Preview](screenshots/ui_preview.png)
 
 The bot is paper-only by default. It reads public Gamma/CLOB data, generates signals, and builds trade intents. Live order submission requires explicit env gates and CLOB credentials.
 

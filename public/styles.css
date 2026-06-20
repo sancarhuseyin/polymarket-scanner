@@ -894,11 +894,14 @@ input:focus-visible {
 }
 
 .analytics-card {
-  transition: border-color 0.2s ease;
+  border-radius: 12px !important;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .analytics-card:hover {
-  border-color: rgba(6, 182, 212, 0.2) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 15px rgba(139, 92, 246, 0.03) !important;
 }
 
 @media (max-width: 900px) {
@@ -906,4 +909,24 @@ input:focus-visible {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Custom Scrollbar Styles for modern Web3 look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.4);
+}
+
 

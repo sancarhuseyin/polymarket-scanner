@@ -53,20 +53,32 @@
               </span>
               <input id="minLiquidity" type="number" min="0" step="100" value="500" />
             </label>
-            <label title="Maximum YES token bid price allowed to qualify as a near-zero YES signal.">
-              <span>YES Bid Cap</span>
+            <label>
+              <span class="label-with-help">
+                YES Bid Cap
+                <span class="help-trigger" title="Maximum YES token bid price allowed to qualify as a near-zero YES signal.">?</span>
+              </span>
               <input id="nearZeroYesMaxBid" type="number" min="0.001" max="0.25" step="0.001" value="0.02" />
             </label>
-            <label title="Maximum order book spread (Ask minus Bid) allowed for a token to be scanned.">
-              <span>Max Spread</span>
+            <label>
+              <span class="label-with-help">
+                Max Spread
+                <span class="help-trigger" title="Maximum order book spread (Ask minus Bid) allowed for a token to be scanned.">?</span>
+              </span>
               <input id="maxSpread" type="number" min="0.001" max="0.5" step="0.001" value="0.03" />
             </label>
-            <label title="Minimum required arbitrage/spread edge for negative-risk sell basket signals.">
-              <span>Basket Edge</span>
+            <label>
+              <span class="label-with-help">
+                Basket Edge
+                <span class="help-trigger" title="Minimum required arbitrage/spread edge for negative-risk sell basket signals.">?</span>
+              </span>
               <input id="correlationEdgeMin" type="number" min="0.001" max="0.5" step="0.001" value="0.04" />
             </label>
-            <label title="Filter markets based on their resolution date relative to the current time.">
-              <span>Resolution</span>
+            <label>
+              <span class="label-with-help">
+                Resolution
+                <span class="help-trigger" title="Filter markets based on their resolution date relative to the current time.">?</span>
+              </span>
               <select id="resolutionFilter">
                 <option value="any" selected>Any Time</option>
                 <option value="1w">Within 1 week</option>
@@ -79,8 +91,11 @@
                 <option value="custom">Custom</option>
               </select>
             </label>
-            <label id="customResolutionGroup" style="display: none;" title="Specify custom resolution time window in days.">
-              <span>Custom (Days)</span>
+            <label id="customResolutionGroup" style="display: none;">
+              <span class="label-with-help">
+                Custom (Days)
+                <span class="help-trigger" title="Specify custom resolution time window in days.">?</span>
+              </span>
               <input id="customResolutionDays" type="number" min="1" step="1" value="7" />
             </label>
           </div>

@@ -795,6 +795,20 @@ function drawPnlCurve(history) {
   path.setAttribute("stroke", "var(--teal)");
   path.setAttribute("stroke-width", "2");
   svg.appendChild(path);
+
+  // Glowing marker dot at last PnL coordinate
+  if (points.length > 0) {
+    const lastPt = points[points.length - 1].split(",");
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", lastPt[0]);
+    circle.setAttribute("cy", lastPt[1]);
+    circle.setAttribute("r", "4");
+    circle.setAttribute("fill", "var(--teal)");
+    circle.setAttribute("stroke", "#ffffff");
+    circle.setAttribute("stroke-width", "1.5");
+    circle.style.animation = "logo-pulse 2s infinite";
+    svg.appendChild(circle);
+  }
 }
 
 // Request desktop notification permission on startup

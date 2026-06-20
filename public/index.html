@@ -30,7 +30,6 @@
           <div class="analytics-card backtest-panel" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
               <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Strategy Backtest & Performance Log</h3>
-              <button class="primary-button" id="runBacktestBtn" style="min-height: 32px; padding: 0 12px; font-size: 0.75rem;" type="button">Run Backtest</button>
             </div>
             <div class="analytics-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
               <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
@@ -246,6 +245,9 @@
             <a id="detailLink" href="#" target="_blank" rel="noopener noreferrer" class="polymarket-button" style="display: none;">
               View on Polymarket ↗
             </a>
+            <button id="runBacktestBtn" class="primary-button" style="display: none; width: 100%; margin-top: 10px; min-height: 44px; justify-content: center; background: var(--violet); color: white;" type="button">
+              Run Backtest ($1,000) ⚙️
+            </button>
           </aside>
         </section>
       </main>

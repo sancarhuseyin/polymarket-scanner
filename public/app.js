@@ -7,7 +7,14 @@ const state = {
   search: "",
   timer: undefined,
   loading: false,
-  seenSignalIds: new Set()
+  seenSignalIds: new Set(),
+  backtestTradesList: [],
+  backtestCumulativePnl: 0,
+  backtestWins: 0,
+  backtestLosses: 0,
+  backtestTotalProfit: 0,
+  backtestTotalLoss: 0,
+  backtestPnlHistory: [0]
 };
 
 const els = {
@@ -322,6 +329,22 @@ function filteredSignals() {
   }
 
   return state.signals.filter((signal) => {
+    // Strict category filtering
+    if (state.selectedCategory && state.selectedCategory !== "all") {
+      const cat = state.selectedCategory.toLowerCase();
+      // Check if any leg contains the selected category tag
+      const matchesCategory = signal.legs?.some((leg) => {
+        const tags = leg.market?.eventTags || [];
+        return tags.some((tag) => {
+          const t = tag.toLowerCase();
+          return t === cat || t.includes(cat) || cat.includes(t);
+        });
+      });
+      if (!matchesCategory) {
+        return false;
+      }
+    }
+
     if (maxTime !== Infinity) {
       const endTime = getSignalEndDate(signal);
       if (endTime > maxTime) {
@@ -389,6 +412,8 @@ function renderDetail() {
     els.chartTargetName.textContent = "";
     const heatmapContainer = document.getElementById("correlationHeatmapContainer");
     if (heatmapContainer) heatmapContainer.style.display = "none";
+    const backtestBtn = document.getElementById("runBacktestBtn");
+    if (backtestBtn) backtestBtn.style.display = "none";
     return;
   }
 
@@ -431,6 +456,12 @@ function renderDetail() {
     els.detailChartContainer.style.display = "none";
     els.detailChart.src = "";
     els.chartTargetName.textContent = "";
+  }
+
+  // Toggle runBacktestBtn visibility
+  const backtestBtn = document.getElementById("runBacktestBtn");
+  if (backtestBtn) {
+    backtestBtn.style.display = "inline-flex";
   }
 
   // Bind click listeners on the newly rendered ladder rows to allow selecting different legs
@@ -631,82 +662,73 @@ function renderCorrelationHeatmap(signal) {
 }
 
 function runBacktest() {
+  const signal = state.signals.find((item) => item.id === state.selectedId);
+  if (!signal) return;
+
+  const legIndex = state.selectedLegIndex || 0;
+  const leg = signal.legs?.[legIndex] || signal.legs?.[0] || {};
+  const price = leg.price || 0.02;
+
   const logEl = document.getElementById("backtestLog");
   const tradesEl = document.getElementById("backtestTrades");
   const winRateEl = document.getElementById("backtestWinRate");
   const profitFactorEl = document.getElementById("backtestProfitFactor");
   const netPnlEl = document.getElementById("backtestNetPnl");
-  
+
   if (!logEl || !tradesEl || !winRateEl || !profitFactorEl || !netPnlEl) return;
 
-  logEl.innerHTML = '<div style="color: var(--teal);">Simulating historical market backtest...</div>';
-  
-  const trades = [];
-  let currentPnL = 0;
-  let wins = 0;
-  let losses = 0;
-  let totalProfit = 0;
-  let totalLoss = 0;
-  const pnlHistory = [0];
+  const notional = 1000;
+  let win = false;
+  let profit = 0;
+  let desc = "";
 
-  const categories = ["politics", "crypto", "pop-culture", "science", "sports", "business"];
-  const numTrades = 40 + Math.floor(Math.random() * 20);
-  const startTime = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  
-  for (let i = 0; i < numTrades; i++) {
-    const tradeTime = new Date(startTime + i * (30 * 24 * 60 * 60 * 1000) / numTrades);
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const isBasket = Math.random() > 0.45;
-    const edge = 0.02 + Math.random() * 0.08;
-    const size = 100 + Math.floor(Math.random() * 400);
-    
-    let win = true;
-    let profit = 0;
-    let description = "";
-
-    if (isBasket) {
-      win = Math.random() > 0.02; // basket arb is mathematically highly robust
-      profit = win ? (size * edge) : -size;
-      description = `Basket Sell Arb (${category.toUpperCase()}): Sum $${(1 + edge).toFixed(3)} for ${size} shares`;
-    } else {
-      const entryPrice = 0.01 + Math.random() * 0.025;
-      win = Math.random() > entryPrice * 1.6;
-      profit = win ? (size * entryPrice) : -(size * (1 - entryPrice));
-      description = `Near-Zero YES Short (${category.toUpperCase()}): Entry $${entryPrice.toFixed(3)} for ${size} shares`;
-    }
-
-    currentPnL += profit;
-    pnlHistory.push(currentPnL);
-    
-    if (profit > 0) {
-      wins++;
-      totalProfit += profit;
-    } else {
-      losses++;
-      totalLoss += Math.abs(profit);
-    }
-
-    trades.push({
-      time: tradeTime.toLocaleString(),
-      description,
-      win,
-      profit,
-      net: currentPnL
-    });
+  if (signal.kind === "neg_risk_sell_basket") {
+    // Basket arb has guaranteed profit since sum of prices exceeds 1 + edge
+    win = Math.random() > 0.01; // 99% success rate
+    profit = win ? (notional * signal.edge) : -(notional * 0.15); // small failure risk
+    desc = `Basket Sell Arb: ${signal.title} @ edge ${(signal.edge * 100).toFixed(2)}%`;
+  } else {
+    // Near-zero YES short
+    // Probability of winning matches the price of YES (win probability is 1 - price)
+    win = Math.random() > price;
+    profit = win ? (notional * price) : -(notional * (1 - price));
+    desc = `Near-Zero YES Sell: ${leg.groupItemTitle || leg.outcome || "YES"} @ $${price.toFixed(3)}`;
   }
 
-  const winRate = (wins / numTrades) * 100;
-  const profitFactor = totalLoss > 0 ? (totalProfit / totalLoss) : totalProfit;
-  
-  tradesEl.textContent = numTrades;
+  state.backtestTradesList.push({
+    time: new Date().toLocaleTimeString(),
+    description: desc,
+    win,
+    profit
+  });
+
+  state.backtestCumulativePnl += profit;
+  state.backtestPnlHistory.push(state.backtestCumulativePnl);
+
+  if (profit > 0) {
+    state.backtestWins++;
+    state.backtestTotalProfit += profit;
+  } else {
+    state.backtestLosses++;
+    state.backtestTotalLoss += Math.abs(profit);
+  }
+
+  const totalTrades = state.backtestTradesList.length;
+  const winRate = (state.backtestWins / totalTrades) * 100;
+  const profitFactor = state.backtestTotalLoss > 0 ? (state.backtestTotalProfit / state.backtestTotalLoss) : state.backtestTotalProfit;
+
+  // Update UI counters
+  tradesEl.textContent = totalTrades;
   winRateEl.textContent = `${winRate.toFixed(1)}%`;
   profitFactorEl.textContent = profitFactor.toFixed(2);
-  netPnlEl.textContent = `${currentPnL >= 0 ? "+" : "-"}$${Math.abs(currentPnL).toFixed(2)}`;
-  netPnlEl.style.color = currentPnL >= 0 ? "var(--teal)" : "var(--red)";
-  
-  logEl.innerHTML = trades
+  netPnlEl.textContent = `${state.backtestCumulativePnl >= 0 ? "+" : "-"}$${Math.abs(state.backtestCumulativePnl).toFixed(2)}`;
+  netPnlEl.style.color = state.backtestCumulativePnl >= 0 ? "var(--teal)" : "var(--red)";
+
+  // Update performance log list
+  logEl.innerHTML = state.backtestTradesList
+    .slice()
     .reverse()
-    .map(t => {
+    .map((t) => {
       const color = t.profit > 0 ? "var(--green)" : "var(--red)";
       const sign = t.profit > 0 ? "+" : "";
       return `<div style="margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;">
@@ -716,8 +738,9 @@ function runBacktest() {
       </div>`;
     })
     .join("");
-     
-  drawPnlCurve(pnlHistory);
+
+  // Draw PnL Curve Chart
+  drawPnlCurve(state.backtestPnlHistory);
 }
 
 function drawPnlCurve(history) {

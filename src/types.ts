@@ -35,6 +35,8 @@ export interface BotConfig {
   apiPassphrase?: string;
   rpcUrl?: string;
   category?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
   output: "text" | "json";
 }
 

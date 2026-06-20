@@ -36,6 +36,8 @@ const envSchema = z.object({
   CLOB_SECRET: z.string().optional(),
   CLOB_PASS_PHRASE: z.string().optional(),
   RPC_URL: z.string().url().optional(),
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_CHAT_ID: z.string().optional(),
   OUTPUT: z.enum(["text", "json"]).default("text")
 });
 
@@ -99,6 +101,8 @@ export function loadConfig(): BotConfig {
     apiSecret,
     apiPassphrase,
     rpcUrl: env.RPC_URL,
+    telegramBotToken: env.TELEGRAM_BOT_TOKEN,
+    telegramChatId: env.TELEGRAM_CHAT_ID,
     output: env.OUTPUT
   };
 }

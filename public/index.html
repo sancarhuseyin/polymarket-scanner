@@ -36,25 +36,21 @@
               <span class="switch-track" aria-hidden="true"></span>
               <span>Auto</span>
             </label>
-            <label class="switch">
-              <input id="sportsOnly" type="checkbox" />
-              <span class="switch-track" aria-hidden="true"></span>
-              <span>Sports</span>
-            </label>
-            <label class="switch" title="Toggle audio feedback alerts and ticks">
-              <input id="soundToggle" type="checkbox" />
-              <span class="switch-track" aria-hidden="true"></span>
-              <span>Sound</span>
-            </label>
           </div>
 
           <div class="control-grid">
-            <label title="Maximum number of active events to fetch from the Polymarket API during scanning.">
-              <span>Markets</span>
+            <label>
+              <span class="label-with-help">
+                Markets
+                <span class="help-trigger" title="Maximum number of active events to fetch from the Polymarket API during scanning.">?</span>
+              </span>
               <input id="maxMarkets" type="number" min="20" max="500" step="10" value="200" />
             </label>
-            <label title="Minimum liquidity (CLOB order book depth/size) required for a market to be scanned.">
-              <span>Liquidity</span>
+            <label>
+              <span class="label-with-help">
+                Liquidity
+                <span class="help-trigger" title="Minimum liquidity (CLOB order book depth/size) required for a market to be scanned.">?</span>
+              </span>
               <input id="minLiquidity" type="number" min="0" step="100" value="500" />
             </label>
             <label title="Maximum YES token bid price allowed to qualify as a near-zero YES signal.">
@@ -168,6 +164,13 @@
                 <dd id="detailEndDate">-</dd>
               </div>
             </dl>
+            <div id="correlationHeatmapContainer" class="heatmap-container" style="display: none; margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #131715;">
+              <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Leg Overlap & Correlation</span>
+                <span style="color: var(--violet); font-family: var(--mono); font-size: 0.65rem;">EXCLUSION MATRIX</span>
+              </div>
+              <div id="heatmapContent" style="display: grid; gap: 4px;"></div>
+            </div>
             <div id="detailChartContainer" class="chart-container" style="display: none; margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #131715; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
               <div class="chart-header" style="padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01);">
                 <span>Live Chart</span>
@@ -187,6 +190,48 @@
               View on Polymarket ↗
             </a>
           </aside>
+        </section>
+
+        <!-- Strategy Analytics & Backtesting Panel -->
+        <section class="analytics-band" style="margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 16px;">
+          <div class="analytics-card backtest-panel" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Strategy Backtest & Performance Log</h3>
+              <button class="primary-button" id="runBacktestBtn" style="min-height: 32px; padding: 0 12px; font-size: 0.75rem;" type="button">Run Backtest</button>
+            </div>
+            <div class="analytics-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Simulated Trades</span>
+                <span id="backtestTrades" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--ink);">0</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Win Rate</span>
+                <span id="backtestWinRate" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--green);">0.0%</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Profit Factor</span>
+                <span id="backtestProfitFactor" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--amber);">1.00</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Net PnL</span>
+                <span id="backtestNetPnl" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--teal);">+$0.00</span>
+              </div>
+            </div>
+            <div id="backtestLog" style="height: 150px; overflow-y: auto; font-family: var(--mono); font-size: 0.74rem; background: #0b0d0c; border: 1px solid var(--line); padding: 10px; color: #a3b2a6; line-height: 1.5; border-radius: 4px;">
+              <div style="color: var(--muted);">Click 'Run Backtest' to simulate execution on historical market captures...</div>
+            </div>
+          </div>
+
+          <div class="analytics-card metric-chart-card" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column;">
+            <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Performance Curve (PnL)</h3>
+            </div>
+            <div style="flex: 1; min-height: 174px; background: #0b0d0c; border: 1px solid var(--line); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 10px;">
+              <div id="pnlCurveSvgContainer" style="width: 100%; height: 100%; min-height: 150px;">
+                <svg id="pnlCurveSvg" width="100%" height="100%" style="overflow: visible;"></svg>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>

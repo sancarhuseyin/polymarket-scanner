@@ -5,6 +5,7 @@ import { GammaClient } from "./gamma.js";
 import { buildTradeIntents } from "./intents.js";
 import { countMarketsWithBooks, type ScanReport } from "./report.js";
 import { findSignals } from "./strategies.js";
+import { sendTelegramAlerts } from "./telegram.js";
 
 export async function runScan(config: BotConfig, execute: boolean): Promise<ScanReport> {
   const gamma = new GammaClient(config);
@@ -13,6 +14,12 @@ export async function runScan(config: BotConfig, execute: boolean): Promise<Scan
   const markets = await gamma.fetchActiveMarkets();
   const enriched = await clob.enrichMarkets(markets);
   const signals = findSignals(enriched, config);
+  
+  // Trigger Telegram Alerts asynchronously
+  sendTelegramAlerts(signals, config).catch((err) => {
+    console.error("Telegram notify error:", err);
+  });
+
   const intents = buildTradeIntents(signals, config);
   const executor = execute ? createExecutor(config) : undefined;
   const executions = executor

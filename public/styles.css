@@ -792,3 +792,79 @@ input:focus-visible {
     background-position: -200% 0;
   }
 }
+
+/* Custom Strategy Analytics and Heatmap CSS */
+.label-with-help {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.help-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: help;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.help-trigger:hover {
+  background: var(--teal);
+  color: #0b0d0c;
+}
+
+.heatmap-grid {
+  display: grid;
+  gap: 2px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+}
+
+.heatmap-header-cell {
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+  padding: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heatmap-label-cell {
+  color: var(--ink);
+  font-weight: 600;
+  padding: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heatmap-value-cell {
+  text-align: center;
+  padding: 6px;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.analytics-card {
+  transition: border-color 0.2s ease;
+}
+
+.analytics-card:hover {
+  border-color: rgba(6, 182, 212, 0.2) !important;
+}
+
+@media (max-width: 900px) {
+  .analytics-band {
+    grid-template-columns: 1fr !important;
+  }
+}
+

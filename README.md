@@ -2,6 +2,8 @@
 
 TypeScript scanner/bot for low-implied-probability YES sells and mutually exclusive market gaps on Polymarket.
 
+![Polymarket Edge Desk Dashboard Preview](screenshots/ui_preview.jpg)
+
 The bot is paper-only by default. It reads public Gamma/CLOB data, generates signals, and builds trade intents. Live order submission requires explicit env gates and CLOB credentials.
 
 ## What It Does

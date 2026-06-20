@@ -25,6 +25,48 @@
       </header>
 
       <main class="desk">
+        <!-- Strategy Analytics & Backtesting Panel -->
+        <section class="analytics-band" style="margin-bottom: 16px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 16px;">
+          <div class="analytics-card backtest-panel" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Strategy Backtest & Performance Log</h3>
+              <button class="primary-button" id="runBacktestBtn" style="min-height: 32px; padding: 0 12px; font-size: 0.75rem;" type="button">Run Backtest</button>
+            </div>
+            <div class="analytics-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Simulated Trades</span>
+                <span id="backtestTrades" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--ink);">0</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Win Rate</span>
+                <span id="backtestWinRate" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--green);">0.0%</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Profit Factor</span>
+                <span id="backtestProfitFactor" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--amber);">1.00</span>
+              </div>
+              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Net PnL</span>
+                <span id="backtestNetPnl" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--teal);">+$0.00</span>
+              </div>
+            </div>
+            <div id="backtestLog" style="height: 150px; overflow-y: auto; font-family: var(--mono); font-size: 0.74rem; background: #0b0d0c; border: 1px solid var(--line); padding: 10px; color: #a3b2a6; line-height: 1.5; border-radius: 4px;">
+              <div style="color: var(--muted);">Click 'Run Backtest' to simulate execution on historical market captures...</div>
+            </div>
+          </div>
+
+          <div class="analytics-card metric-chart-card" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column;">
+            <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Performance Curve (PnL)</h3>
+            </div>
+            <div style="flex: 1; min-height: 174px; background: #0b0d0c; border: 1px solid var(--line); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 10px;">
+              <div id="pnlCurveSvgContainer" style="width: 100%; height: 100%; min-height: 150px;">
+                <svg id="pnlCurveSvg" width="100%" height="100%" style="overflow: visible;"></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="control-band" aria-label="Scan settings">
           <div class="control-group scan-actions">
             <button class="primary-button" id="scanButton" type="button">
@@ -205,48 +247,6 @@
               View on Polymarket ↗
             </a>
           </aside>
-        </section>
-
-        <!-- Strategy Analytics & Backtesting Panel -->
-        <section class="analytics-band" style="margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 16px;">
-          <div class="analytics-card backtest-panel" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
-              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Strategy Backtest & Performance Log</h3>
-              <button class="primary-button" id="runBacktestBtn" style="min-height: 32px; padding: 0 12px; font-size: 0.75rem;" type="button">Run Backtest</button>
-            </div>
-            <div class="analytics-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
-              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
-                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Simulated Trades</span>
-                <span id="backtestTrades" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--ink);">0</span>
-              </div>
-              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
-                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Win Rate</span>
-                <span id="backtestWinRate" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--green);">0.0%</span>
-              </div>
-              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
-                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Profit Factor</span>
-                <span id="backtestProfitFactor" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--amber);">1.00</span>
-              </div>
-              <div style="background: var(--field); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
-                <span style="font-size: 0.68rem; color: var(--muted); display: block; text-transform: uppercase; font-weight: 700;">Net PnL</span>
-                <span id="backtestNetPnl" style="font-family: var(--mono); font-size: 1.1rem; font-weight: 800; color: var(--teal);">+$0.00</span>
-              </div>
-            </div>
-            <div id="backtestLog" style="height: 150px; overflow-y: auto; font-family: var(--mono); font-size: 0.74rem; background: #0b0d0c; border: 1px solid var(--line); padding: 10px; color: #a3b2a6; line-height: 1.5; border-radius: 4px;">
-              <div style="color: var(--muted);">Click 'Run Backtest' to simulate execution on historical market captures...</div>
-            </div>
-          </div>
-
-          <div class="analytics-card metric-chart-card" style="border: 1px solid var(--line); background: rgba(19, 23, 21, 0.88); backdrop-filter: blur(12px); box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column;">
-            <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
-              <h3 style="margin: 0; font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; font-weight: 750;">Performance Curve (PnL)</h3>
-            </div>
-            <div style="flex: 1; min-height: 174px; background: #0b0d0c; border: 1px solid var(--line); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 10px;">
-              <div id="pnlCurveSvgContainer" style="width: 100%; height: 100%; min-height: 150px;">
-                <svg id="pnlCurveSvg" width="100%" height="100%" style="overflow: visible;"></svg>
-              </div>
-            </div>
-          </div>
         </section>
       </main>
     </div>

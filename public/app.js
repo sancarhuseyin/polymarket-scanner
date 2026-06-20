@@ -822,8 +822,8 @@ if (backtestBtn) {
   backtestBtn.addEventListener("click", () => runBacktest());
 }
 
-// Draw initial backtest on load
-setTimeout(() => runBacktest(), 500);
+// Draw initial flat baseline chart representing 0 trades on load
+setTimeout(() => drawPnlCurve([0, 0]), 200);
 
 // Adjust SVG on window resize
 window.addEventListener("resize", () => {

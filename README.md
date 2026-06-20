@@ -1,23 +1,14 @@
 # Polymarket Scanner Bot
 
-TypeScript scanner/bot for low-implied-probability YES sells and mutually exclusive market gaps on Polymarket.
+**Polymarket Edge Desk** is a professional-grade TypeScript trading terminal, scanner, and execution bot designed to exploit mathematical pricing inefficiencies and high-probability setups on Polymarket's decentralized prediction markets. The bot automates the identification and execution of near-zero YES contract yield harvesting and mutually exclusive negative risk basket arbitrage.
 
 ![Polymarket Edge Desk Dashboard Preview](screenshots/ui_preview.jpg)
 
 The bot is paper-only by default. It reads public Gamma/CLOB data, generates signals, and builds trade intents. Live order submission requires explicit env gates and CLOB credentials.
 
-## Overview & Value Proposition (Ne İşe Yarar?)
-
-**Polymarket Edge Desk** is a professional-grade trading terminal, scanner, and execution bot designed to exploit mathematical pricing inefficiencies and high-probability setups on Polymarket's decentralized prediction markets.
-
-Prediction markets often exhibit specific structural inefficiencies due to retail speculation, illiquidity, and lack of automated arbitrage. This system automates the identification and execution of two primary trading models:
-
-1. **High-Probability Yield Harvesting (Near-Zero YES Shorting)**
-2. **Negative Risk Arbitrage (Mutually Exclusive Outcome Baskets)**
-
 ---
 
-## Strategic Core & Profit Mechanics (Çalışma Mantığı ve Stratejiler)
+## Strategic Core & Profit Mechanics
 
 ### 1. Near-Zero YES Shorting (`near_zero_yes`)
 * **The Opportunity**: Retail traders often buy low-probability "lottery ticket" YES contracts (e.g., a candidate winning an election who is mathematically out of the race) pushing the YES price to a small amount (like $0.01 or $0.02).

@@ -1,6 +1,7 @@
 {
   "name": "polymarket-scanner",
   "version": "0.1.0",
+  "description": "TypeScript scanner and automated arbitrage bot for low-implied-probability YES contracts and mutually exclusive market gaps on Polymarket.",
   "private": true,
   "type": "module",
   "scripts": {

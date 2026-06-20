@@ -6,14 +6,39 @@ TypeScript scanner/bot for low-implied-probability YES sells and mutually exclus
 
 The bot is paper-only by default. It reads public Gamma/CLOB data, generates signals, and builds trade intents. Live order submission requires explicit env gates and CLOB credentials.
 
-## What It Does
+## Overview & Value Proposition (Ne İşe Yarar?)
 
-- Scans active Polymarket events from Gamma.
-- Pulls live CLOB order books for YES/NO tokens.
-- Flags `near_zero_yes` signals when the YES best bid is below `NEAR_ZERO_YES_MAX_BID`.
-- Flags `neg_risk_sell_basket` signals when mutually exclusive YES bids sum above `1 + CORRELATION_EDGE_MIN`.
-- Builds risk-capped trade intents.
-- Submits CLOB GTC limit orders only when live mode is explicitly enabled.
+**Polymarket Edge Desk** is a professional-grade trading terminal, scanner, and execution bot designed to exploit mathematical pricing inefficiencies and high-probability setups on Polymarket's decentralized prediction markets.
+
+Prediction markets often exhibit specific structural inefficiencies due to retail speculation, illiquidity, and lack of automated arbitrage. This system automates the identification and execution of two primary trading models:
+
+1. **High-Probability Yield Harvesting (Near-Zero YES Shorting)**
+2. **Negative Risk Arbitrage (Mutually Exclusive Outcome Baskets)**
+
+---
+
+## Strategic Core & Profit Mechanics (Çalışma Mantığı ve Stratejiler)
+
+### 1. Near-Zero YES Shorting (`near_zero_yes`)
+* **The Opportunity**: Retail traders often buy low-probability "lottery ticket" YES contracts (e.g., a candidate winning an election who is mathematically out of the race) pushing the YES price to a small amount (like $0.01 or $0.02).
+* **The Trade**: The bot sells (shorts) these YES contracts (or buys the NO proxy token). 
+* **Profit Scenario**: If the outcome resolves to **NO** (highly likely), the YES contract settles to $0.00. The bot keeps the entire entry price ($0.01 - $0.02 per share) as profit. By shorting multiple unrelated near-zero contracts, the trader harvests high-probability yield with a very wide statistical margin of safety.
+
+### 2. Mutually Exclusive Basket Arbitrage (`neg_risk_sell_basket`)
+* **The Opportunity**: In markets where **exactly one outcome can resolve YES** (e.g., "Which team will win the NBA Championship?"), the sum of all outcomes' final prices must equal exactly $1.00. However, during active trading, retail bidding can push the sum of the best bids of all outcomes above $1.00 + edge (e.g., $1.06).
+* **The Trade**: The bot places simultaneous sell limit orders on the YES contracts of all outcomes in the group (or buys NO proxy tokens proportionally).
+* **Profit Scenario**: Because only one team can win, exactly one contract settles to $1.00 and all others settle to $0.00. The total payout required is exactly $1.00. Since we sold the basket for $1.06, we pocket the $0.06 difference per share as **risk-free mathematical arbitrage**, regardless of who wins the tournament.
+
+---
+
+## Key Features
+
+- **Gamma API Scanning**: Scans active Polymarket events directly by category tag.
+- **CLOB Order Book Depth**: Fetches live order book state for YES/NO tokens to ensure sufficient execution depth.
+- **Risk Control Engine**: Builds trade intents with configurable limits (max slippage, cap on total settlement risk per asset).
+- **Telegram & Desktop Notifications**: Anomaly alerts pushed directly to Telegram or as native OS notifications.
+- **Strategy Backtesting**: Built-in Monte Carlo simulation module to backtest returns and chart equity curves directly in the UI.
+- **Exclusion Heatmaps**: Color-coded correlation matrices showing price relationships and exclusion intensities inside leg groups.
 
 ## Setup
 

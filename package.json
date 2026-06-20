@@ -1,0 +1,28 @@
+{
+  "name": "polymarket-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scan": "tsx src/index.ts scan",
+    "bot": "tsx src/index.ts bot",
+    "ui": "tsx src/web.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@polymarket/clob-client-v2": "^1.0.6",
+    "dotenv": "^16.4.7",
+    "viem": "^2.52.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "ws": "^8.21.0"
+  }
+}

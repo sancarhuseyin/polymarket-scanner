@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Polymarket Edge Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <img class="brand-logo" src="/logo.jpg" alt="Polymarket Edge Desk Logo" />
+          <div>
+            <h1>Polymarket Edge Desk</h1>
+          </div>
+        </div>
+        <div class="status-stack" aria-live="polite">
+          <span class="mode-pill" id="modePill">Paper UI</span>
+          <span class="clock" id="clock">Idle</span>
+        </div>
+      </header>
+
+      <main class="desk">
+        <section class="control-band" aria-label="Scan settings">
+          <div class="control-group scan-actions">
+            <button class="primary-button" id="scanButton" type="button">
+              <span aria-hidden="true">↻</span>
+              Scan
+            </button>
+            <label class="switch">
+              <input id="autoRefresh" type="checkbox" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Auto</span>
+            </label>
+            <label class="switch">
+              <input id="sportsOnly" type="checkbox" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Sports</span>
+            </label>
+            <label class="switch" title="Toggle audio feedback alerts and ticks">
+              <input id="soundToggle" type="checkbox" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Sound</span>
+            </label>
+          </div>
+
+          <div class="control-grid">
+            <label title="Maximum number of active events to fetch from the Polymarket API during scanning.">
+              <span>Markets</span>
+              <input id="maxMarkets" type="number" min="20" max="500" step="10" value="200" />
+            </label>
+            <label title="Minimum liquidity (CLOB order book depth/size) required for a market to be scanned.">
+              <span>Liquidity</span>
+              <input id="minLiquidity" type="number" min="0" step="100" value="500" />
+            </label>
+            <label title="Maximum YES token bid price allowed to qualify as a near-zero YES signal.">
+              <span>YES Bid Cap</span>
+              <input id="nearZeroYesMaxBid" type="number" min="0.001" max="0.25" step="0.001" value="0.02" />
+            </label>
+            <label title="Maximum order book spread (Ask minus Bid) allowed for a token to be scanned.">
+              <span>Max Spread</span>
+              <input id="maxSpread" type="number" min="0.001" max="0.5" step="0.001" value="0.03" />
+            </label>
+            <label title="Minimum required arbitrage/spread edge for negative-risk sell basket signals.">
+              <span>Basket Edge</span>
+              <input id="correlationEdgeMin" type="number" min="0.001" max="0.5" step="0.001" value="0.04" />
+            </label>
+            <label title="Filter markets based on their resolution date relative to the current time.">
+              <span>Resolution</span>
+              <select id="resolutionFilter">
+                <option value="any">Any Time</option>
+                <option value="1w">Within 1 week</option>
+                <option value="2w">Within 2 weeks</option>
+                <option value="3w">Within 3 weeks</option>
+                <option value="1m" selected>Within 1 month</option>
+                <option value="3m">Within 3 months</option>
+                <option value="6m">Within 6 months</option>
+                <option value="1y">Within 1 year</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label id="customResolutionGroup" style="display: none;" title="Specify custom resolution time window in days.">
+              <span>Custom (Days)</span>
+              <input id="customResolutionDays" type="number" min="1" step="1" value="7" />
+            </label>
+          </div>
+        </section>
+
+        <section class="ticker-strip" aria-label="Summary">
+          <div>
+            <span class="metric-value" id="marketsMetric">0</span>
+            <span class="metric-label">markets</span>
+          </div>
+          <div>
+            <span class="metric-value" id="signalsMetric">0</span>
+            <span class="metric-label">signals</span>
+          </div>
+          <div>
+            <span class="metric-value" id="intentsMetric">0</span>
+            <span class="metric-label">paper intents</span>
+          </div>
+          <div>
+            <span class="metric-value" id="topEdgeMetric">0.00%</span>
+            <span class="metric-label">top edge</span>
+          </div>
+          <div class="edge-tape" id="edgeTape" aria-hidden="true"></div>
+        </section>
+
+        <section class="workspace">
+          <div class="signal-ledger">
+            <div class="ledger-toolbar">
+              <div class="segmented" role="tablist" aria-label="Category filter">
+                <button class="segment active" data-category="all" type="button">All</button>
+                <button class="segment" data-category="politics" type="button">Politics</button>
+                <button class="segment" data-category="crypto" type="button">Crypto</button>
+                <button class="segment" data-category="pop-culture" type="button">Pop Culture</button>
+                <button class="segment" data-category="science" type="button">Science</button>
+                <button class="segment" data-category="sports" type="button">Sports</button>
+                <button class="segment" data-category="business" type="button">Business</button>
+              </div>
+              <label class="search-box">
+                <span>Find</span>
+                <input id="searchInput" type="search" placeholder="Market or team" style="width: 180px; min-height: 38px;" />
+              </label>
+            </div>
+
+            <div class="ledger-head" aria-hidden="true">
+              <span>Signal</span>
+              <span>Price</span>
+              <span>Trend</span>
+              <span>Depth</span>
+              <span>Edge</span>
+            </div>
+            <div class="signal-list" id="signalList" aria-live="polite">
+              <div class="empty-state">Waiting for scan</div>
+            </div>
+          </div>
+
+          <aside class="detail-pane" aria-label="Signal detail">
+            <div class="detail-header">
+              <span class="detail-kicker" id="detailKind">Detail</span>
+              <h2 id="detailTitle">No signal selected</h2>
+            </div>
+            <div class="price-ladder" id="priceLadder" aria-hidden="true"></div>
+            <dl class="detail-grid">
+              <div>
+                <dt>Edge</dt>
+                <dd id="detailEdge">-</dd>
+              </div>
+              <div>
+                <dt>Price</dt>
+                <dd id="detailPrice">-</dd>
+              </div>
+              <div>
+                <dt>Depth</dt>
+                <dd id="detailDepth">-</dd>
+              </div>
+              <div>
+                <dt>Liquidity</dt>
+                <dd id="detailLiquidity">-</dd>
+              </div>
+              <div style="grid-column: span 2; min-height: 60px;">
+                <dt>Resolution</dt>
+                <dd id="detailEndDate">-</dd>
+              </div>
+            </dl>
+            <div id="detailChartContainer" class="chart-container" style="display: none; margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #131715; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
+              <div class="chart-header" style="padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01);">
+                <span>Live Chart</span>
+                <span id="chartTargetName" style="color: var(--teal); font-family: var(--mono); text-transform: none;"></span>
+              </div>
+              <div style="height: 310px; position: relative; overflow: hidden; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; background: #131715;">
+                <div id="chartSkeleton" class="skeleton" style="display: none; position: absolute; inset: 0; background: linear-gradient(90deg, #181d1a 25%, #222924 50%, #181d1a 75%); background-size: 200% 100%; animation: skeleton-pulse 1.5s infinite; z-index: 5; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;"></div>
+                <iframe id="detailChart" src="" style="width: 100%; height: 100%; border: 0; display: block; overflow: hidden; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; background: #131715;" allowtransparency="true" scrolling="no"></iframe>
+              </div>
+            </div>
+            <div class="reason-box" id="detailReason">Select a signal to view reasoning.</div>
+            <div class="intent-box">
+              <div class="intent-label">Paper intent</div>
+              <div id="intentPreview">None yet</div>
+            </div>
+            <a id="detailLink" href="#" target="_blank" rel="noopener noreferrer" class="polymarket-button" style="display: none;">
+              View on Polymarket ↗
+            </a>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

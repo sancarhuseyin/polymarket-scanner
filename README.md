@@ -4,6 +4,9 @@
 
 ![Polymarket Edge Desk Dashboard Preview](screenshots/ui_preview.png)
 
+*Example of populated Strategy Backtest Console & PnL Curve after 10 trades:*
+![Polymarket Edge Desk Backtest Example](screenshots/ui_backtest_example.png)
+
 The bot is paper-only by default. It reads public Gamma/CLOB data, generates signals, and builds trade intents. Live order submission requires explicit env gates and CLOB credentials.
 
 ---

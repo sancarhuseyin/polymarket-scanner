@@ -308,6 +308,15 @@ function getSignalEndDate(signal) {
   return minTime;
 }
 
+const categoryKeywords = {
+  politics: ["politics", "election", "biden", "trump", "house", "senate", "presidency", "government", "court", "democrat", "republican"],
+  crypto: ["crypto", "coin", "bitcoin", "ethereum", "solana", "altcoin", "etf", "blockchain", "token", "clob", "memecoin", "tether", "binance", "coinbase"],
+  "pop-culture": ["pop", "culture", "cinema", "music", "celebrity", "movie", "oscar", "grammy", "box office", "tiktok", "youtube", "twitter", "kanye", "drake", "taylor", "swift", "mrbeast", "show", "entertainment"],
+  science: ["science", "space", "climate", "ai", "artificial intelligence", "openai", "chatgpt", "tech", "biology", "health", "medicine", "covid", "vaccine", "nasa", "spacex", "physics"],
+  sports: ["sports", "soccer", "football", "basketball", "nba", "nfl", "mlb", "nhl", "ufc", "tennis", "golf", "boxing", "f1", "formula", "cup", "league", "fifa", "premier", "championship"],
+  business: ["business", "economy", "finance", "stock", "fed", "interest", "inflation", "macro", "gdp", "apple", "tesla", "nvidia", "google", "meta", "microsoft", "market", "rate", "unemployment", "recession"]
+};
+
 function filteredSignals() {
   const now = Date.now();
   const resFilter = els.resolutionFilter.value;
@@ -329,15 +338,17 @@ function filteredSignals() {
   }
 
   return state.signals.filter((signal) => {
-    // Strict category filtering
+    // Robust category filtering
     if (state.selectedCategory && state.selectedCategory !== "all") {
       const cat = state.selectedCategory.toLowerCase();
-      // Check if any leg contains the selected category tag
+      const keywords = categoryKeywords[cat] || [cat];
+      
       const matchesCategory = signal.legs?.some((leg) => {
-        const tags = leg.market?.eventTags || [];
-        return tags.some((tag) => {
-          const t = tag.toLowerCase();
-          return t === cat || t.includes(cat) || cat.includes(t);
+        const tags = (leg.eventTags || []).map((t) => t.toLowerCase());
+        const text = `${signal.title || ""} ${leg.question || ""} ${leg.eventTitle || ""}`.toLowerCase();
+        
+        return keywords.some((keyword) => {
+          return tags.some((tag) => tag.includes(keyword) || keyword.includes(tag)) || text.includes(keyword);
         });
       });
       if (!matchesCategory) {
@@ -625,7 +636,7 @@ function renderCorrelationHeatmap(signal) {
   legs.forEach((leg, i) => {
     const cell = document.createElement("div");
     cell.className = "heatmap-header-cell";
-    cell.title = leg.market.groupItemTitle || leg.market.question || `Leg ${i + 1}`;
+    cell.title = leg.groupItemTitle || leg.question || `Leg ${i + 1}`;
     cell.textContent = `L${i + 1}`;
     content.appendChild(cell);
   });
@@ -635,7 +646,7 @@ function renderCorrelationHeatmap(signal) {
     const labelCell = document.createElement("div");
     labelCell.className = "heatmap-label-cell";
     labelCell.textContent = `L${r + 1}`;
-    labelCell.title = rowLeg.market.groupItemTitle || rowLeg.market.question || `Leg ${r + 1}`;
+    labelCell.title = rowLeg.groupItemTitle || rowLeg.question || `Leg ${r + 1}`;
     content.appendChild(labelCell);
 
     legs.forEach((colLeg, c) => {
@@ -726,13 +737,13 @@ function runBacktest() {
 
   // Update performance log list
   logEl.innerHTML = state.backtestTradesList
-    .slice()
+    .map((t, idx) => ({ ...t, num: idx + 1 }))
     .reverse()
     .map((t) => {
       const color = t.profit > 0 ? "var(--green)" : "var(--red)";
       const sign = t.profit > 0 ? "+" : "";
       return `<div style="margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 4px;">
-        <span style="color: var(--muted);">${t.time}</span> · 
+        <span style="color: var(--muted);">[#${t.num}] ${t.time}</span> · 
         <span>${t.description}</span> -> 
         <span style="color: ${color}; font-weight: 700;">${sign}$${t.profit.toFixed(2)}</span>
       </div>`;
@@ -753,31 +764,112 @@ function drawPnlCurve(history) {
   svg.setAttribute("height", height.toString());
   svg.innerHTML = "";
   
-  if (!history || history.length === 0) return;
+  let chartHistory = history;
+  if (!chartHistory || chartHistory.length === 0) {
+    chartHistory = [0, 0];
+  } else if (chartHistory.length === 1) {
+    chartHistory = [chartHistory[0], chartHistory[0]];
+  }
   
-  const minVal = Math.min(...history);
-  const maxVal = Math.max(...history);
+  const minVal = Math.min(...chartHistory);
+  const maxVal = Math.max(...chartHistory);
   const valRange = maxVal - minVal || 1;
   
-  const padding = 10;
-  const points = history.map((val, idx) => {
-    const x = padding + (idx / (history.length - 1)) * (width - 2 * padding);
-    const y = height - padding - ((val - minVal) / valRange) * (height - 2 * padding);
+  const paddingLeft = 55;
+  const paddingRight = 15;
+  const paddingTop = 15;
+  const paddingBottom = 30;
+  
+  const plotWidth = width - paddingLeft - paddingRight;
+  const plotHeight = height - paddingTop - paddingBottom;
+  
+  const points = chartHistory.map((val, idx) => {
+    const x = paddingLeft + (idx / (chartHistory.length - 1)) * plotWidth;
+    const y = paddingTop + plotHeight - ((val - minVal) / valRange) * plotHeight;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
   
-  // Grid lines
+  // Grid lines and Y axis ticks (Profit)
   const gridCount = 4;
   for (let i = 0; i <= gridCount; i++) {
-    const yVal = padding + (i / gridCount) * (height - 2 * padding);
+    const pct = i / gridCount;
+    const yVal = paddingTop + plotHeight - pct * plotHeight;
+    const val = minVal + pct * valRange;
+    
+    // Grid line
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", "0");
+    line.setAttribute("x1", paddingLeft.toString());
     line.setAttribute("y1", yVal.toString());
-    line.setAttribute("x2", width.toString());
+    line.setAttribute("x2", (width - paddingRight).toString());
     line.setAttribute("y2", yVal.toString());
     line.setAttribute("stroke", "var(--line)");
     line.setAttribute("stroke-dasharray", "3,3");
     svg.appendChild(line);
+    
+    // Y-Axis Label (Profit)
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", (paddingLeft - 8).toString());
+    text.setAttribute("y", (yVal + 3).toString());
+    text.setAttribute("fill", "var(--muted)");
+    text.setAttribute("font-size", "9px");
+    text.setAttribute("font-family", "var(--mono)");
+    text.setAttribute("text-anchor", "end");
+    
+    const formattedVal = val >= 0 ? `+$${val.toFixed(0)}` : `-$${Math.abs(val).toFixed(0)}`;
+    text.textContent = formattedVal;
+    svg.appendChild(text);
+  }
+  
+  // Y Axis border line
+  const yAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  yAxis.setAttribute("x1", paddingLeft.toString());
+  yAxis.setAttribute("y1", paddingTop.toString());
+  yAxis.setAttribute("x2", paddingLeft.toString());
+  yAxis.setAttribute("y2", (paddingTop + plotHeight).toString());
+  yAxis.setAttribute("stroke", "var(--line)");
+  svg.appendChild(yAxis);
+
+  // X Axis border line
+  const xAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  xAxis.setAttribute("x1", paddingLeft.toString());
+  xAxis.setAttribute("y1", (paddingTop + plotHeight).toString());
+  xAxis.setAttribute("x2", (width - paddingRight).toString());
+  xAxis.setAttribute("y2", (paddingTop + plotHeight).toString());
+  xAxis.setAttribute("stroke", "var(--line)");
+  svg.appendChild(xAxis);
+
+  // X-Axis ticks and labels (Trade Number)
+  const xTickCount = Math.min(5, chartHistory.length);
+  for (let i = 0; i < xTickCount; i++) {
+    const idx = xTickCount > 1 ? Math.round((i / (xTickCount - 1)) * (chartHistory.length - 1)) : 0;
+    const xVal = paddingLeft + (idx / (chartHistory.length - 1)) * plotWidth;
+    
+    // Tick mark
+    const tickLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    tickLine.setAttribute("x1", xVal.toString());
+    tickLine.setAttribute("y1", (paddingTop + plotHeight).toString());
+    tickLine.setAttribute("x2", xVal.toString());
+    tickLine.setAttribute("y2", (paddingTop + plotHeight + 4).toString());
+    tickLine.setAttribute("stroke", "var(--line)");
+    svg.appendChild(tickLine);
+    
+    // Trade label
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", xVal.toString());
+    text.setAttribute("y", (paddingTop + plotHeight + 15).toString());
+    text.setAttribute("fill", "var(--muted)");
+    text.setAttribute("font-size", "9px");
+    text.setAttribute("font-family", "var(--mono)");
+    text.setAttribute("text-anchor", "middle");
+    
+    if (idx === 0) {
+      text.textContent = "Start";
+    } else if (state.backtestTradesList.length === 0) {
+      text.textContent = "";
+    } else {
+      text.textContent = `#${idx}`;
+    }
+    svg.appendChild(text);
   }
   
   // Define Gradient
@@ -806,11 +898,15 @@ function drawPnlCurve(history) {
   
   // Area under path
   const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  const fillPoints = [...points, `${points[points.length - 1].split(",")[0]},${height - padding}`, `${points[0].split(",")[0]},${height - padding}`];
+  const fillPoints = [
+    ...points,
+    `${points[points.length - 1].split(",")[0]},${paddingTop + plotHeight}`,
+    `${points[0].split(",")[0]},${paddingTop + plotHeight}`
+  ];
   area.setAttribute("d", `M ${fillPoints.join(" L ")} Z`);
   area.setAttribute("fill", "url(#pnlGradient)");
   svg.appendChild(area);
-
+ 
   // PnL Path
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   path.setAttribute("d", `M ${points.join(" L ")}`);
@@ -818,7 +914,7 @@ function drawPnlCurve(history) {
   path.setAttribute("stroke", "var(--teal)");
   path.setAttribute("stroke-width", "2");
   svg.appendChild(path);
-
+ 
   // Glowing marker dot at last PnL coordinate
   if (points.length > 0) {
     const lastPt = points[points.length - 1].split(",");
@@ -846,18 +942,9 @@ if (backtestBtn) {
 }
 
 // Draw initial flat baseline chart representing 0 trades on load
-setTimeout(() => drawPnlCurve([0, 0]), 200);
+setTimeout(() => drawPnlCurve(state.backtestPnlHistory), 200);
 
 // Adjust SVG on window resize
 window.addEventListener("resize", () => {
-  const svg = document.getElementById("pnlCurveSvg");
-  if (svg && svg.dataset.history) {
-    drawPnlCurve(JSON.parse(svg.dataset.history));
-  } else {
-    // Redraw using a default run to match size
-    const pnlHistoryText = document.getElementById("backtestNetPnl")?.dataset.history;
-    if (pnlHistoryText) {
-      drawPnlCurve(JSON.parse(pnlHistoryText));
-    }
-  }
+  drawPnlCurve(state.backtestPnlHistory);
 });

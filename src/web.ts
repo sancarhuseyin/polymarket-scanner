@@ -126,7 +126,11 @@ function publicConfig(config: BotConfig): Record<string, unknown> {
 }
 
 function getNumber(params: URLSearchParams, key: string, fallback: number): number {
-  const value = Number(params.get(key));
+  const raw = params.get(key);
+  if (raw === null || raw === "") {
+    return fallback;
+  }
+  const value = Number(raw);
   return Number.isFinite(value) ? value : fallback;
 }
 

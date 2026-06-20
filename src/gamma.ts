@@ -58,7 +58,7 @@ export class GammaClient {
       url.searchParams.set("order", "volume24hr");
       url.searchParams.set("ascending", "false");
       if (this.config.category && this.config.category !== "all") {
-        url.searchParams.set("tagSlug", this.config.category);
+        url.searchParams.set("tag_slug", this.config.category);
       }
 
       const response = await fetch(url);

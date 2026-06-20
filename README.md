@@ -88,3 +88,8 @@ Use this only where Polymarket trading is legal and permitted for your account. 
 npm run typecheck
 npm run test
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
